@@ -4,6 +4,8 @@ from typing import List
 
 from pydantic import BaseSettings
 
+# __file__是Python中一个预定义的变量，用于获取当前脚本的文件路径。os.path.abspath(__file__)用来获取当前脚本的绝对路径。
+# os.path.dirname(os.path.abspath(__file__))用来获取当前脚本所在的目录的绝对路径。
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
