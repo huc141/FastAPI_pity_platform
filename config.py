@@ -9,6 +9,7 @@ from pydantic import BaseSettings
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
+# BaseSettings是Python中Pydantic库中的一个类，它的作用是提供一个方便的方式来定义应用程序的配置项，并且支持验证和类型转换。
 class BaseConfig(BaseSettings):
     LOG_DIR = os.path.join(ROOT, 'logs')
     LOG_NAME = os.path.join(LOG_DIR, 'pity.log')
@@ -100,7 +101,11 @@ class BaseConfig(BaseSettings):
     PITY_ERROR = "pity_error"
     PITY_INFO = "pity_info"
 
-
+# 这两个类中定义子类的作用是使用Pydantic库提供的功能来对配置项进行验证和类型转换。通过在内部定义一个名为Config的子类，并在其中设置各种配置项，
+# 可以使用Pydantic提供的数据验证和转换功能来保证配置项的正确性和合法性。
+# Pydantic的BaseSettings类要求在子类中必须定义一个名为Config的子类，以便设置配置项。这个Config子类是必须定义的，而且名称也必须为Config，
+# 因为Pydantic会在初始化时查找这个子类，并使用其中定义的属性来设置实例对象的属性。
+# 如果在子类中没有定义Config子类，或者定义了其他名称的子类，则在实例化时会引发ConfigError异常。
 class DevConfig(BaseConfig):
     class Config:
         env_file = os.path.join(ROOT, "conf", "dev.env")
@@ -113,9 +118,13 @@ class ProConfig(BaseConfig):
     SERVER_REPORT = "https://pity.fun/#/record/report/"
     SERVER_HOST = "127.0.0.1"
 
-
-# 获取pity环境变量
+# os.environ.get 是一个 Python 内置函数，它用于获取环境变量的值。该函数可以传入一个参数作为要获取的环境变量的键（key），
+# 如果该键存在，则返回对应的值（value），如果不存在，则返回默认值（默认为 None），
+# 具体地说，os.environ.get() 函数的第一个参数是要获取的环境变量的键（key），即 "pity_env"。
+# 第二个参数是默认值，如果指定的环境变量不存在，则返回默认值 "dev"。
+# 以下获取pity环境变量
 PITY_ENV = os.environ.get("pity_env", "dev")
+
 # 如果pity_env存在且为prod
 Config = ProConfig() if PITY_ENV and PITY_ENV.lower() == "pro" else DevConfig()
 
