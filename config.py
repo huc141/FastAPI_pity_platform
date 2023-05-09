@@ -135,11 +135,16 @@ Config.REDIS_NODES = [
     }
 ]
 
-# init sqlalchemy (used by apscheduler)
+# 使用 format 函数格式化一个数据库连接字符串，该字符串指定了数据库连接的各个参数，包括 MySQL 用户名、密码、主机名、端口号和数据库名等.
+# 使用 Config 类中定义的常量 MYSQL_USER、MYSQL_PWD、MYSQL_HOST、MYSQL_PORT 和 DBNAME，按照特定的格式拼接成一个完整的数据库连接字符串，
+# 并将其赋值给 Config 类中的 SQLALCHEMY_DATABASE_URI 变量.
+# 通过 "{}:{}@{}:{}/{}" 的占naweis位符格式，将 MySQL 用户名、密码、主机名、端口号和数据库名插入到相应的位置，最终形成一个完整的数据库连接字符串。
+# 其中，花括号 {} 表示占位符.最终拼接出来的字符串的形式如下:mysql+mysqlconnector://<username>:<password>@<host>:<port>/<database>
 Config.SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://{}:{}@{}:{}/{}'.format(
     Config.MYSQL_USER, Config.MYSQL_PWD, Config.MYSQL_HOST, Config.MYSQL_PORT, Config.DBNAME)
 
-# init async sqlalchemy
+# 这种写法使用的是f-string，它是Python3.6引入的一种新的字符串格式化方式，使用起来比较简洁，
+# 可读性更高。它的语法是在字符串前加上一个f，然后在字符串中使用{}来引用变量。
 Config.ASYNC_SQLALCHEMY_URI = f'mysql+aiomysql://{Config.MYSQL_USER}:{Config.MYSQL_PWD}' \
                               f'@{Config.MYSQL_HOST}:{Config.MYSQL_PORT}/{Config.DBNAME}'
 
