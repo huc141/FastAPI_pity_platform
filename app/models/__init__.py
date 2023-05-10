@@ -8,10 +8,16 @@ from app.enums.DatabaseEnum import DatabaseEnum
 from config import Config
 
 
+# create_database() 函数利用 SQLAlchemy 的 create_engine() 方法创建一个数据库引擎对象 engine，
+# 并通过 conn.execute() 方法创建了一个名为 pity 的数据库。
+# 同时，echo=True 参数设置可以让 SQLAlchemy 打印更多的调试信息。
 def create_database():
     engine = create_engine('mysql+mysqlconnector://{}:{}@{}:{}'.format(
         Config.MYSQL_USER, Config.MYSQL_PWD, Config.MYSQL_HOST, Config.MYSQL_PORT), echo=True)
+    # 使用 with engine.connect() as conn，可以创建一个 engine 的连接，使用 as 关键字将 conn 作为 engine.connect() 返回的连接对象的别名，可以在with语句块中使用 conn 进行数据库操作。
+    # 并在代码块执行结束后自动释放这个连接。这样可以防止在程序出现异常的情况下，连接没有被正确释放而造成的资源泄漏。
     with engine.connect() as conn:
+        # 使用 conn 变量执行各种 SQL 操作。
         conn.execute("CREATE DATABASE IF NOT EXISTS pity default character set utf8mb4 collate utf8mb4_unicode_ci")
     # close engine
     engine.dispose()
@@ -124,7 +130,14 @@ db_helper = DatabaseHelper()
 在异步应用程序中，每个请求和响应都需要在异步方式下处理，
 因为同步的会话类可能会阻塞异步应用程序的事件循环。
 
-SQLAlchemy提供了AsyncSession类来解决这个问题。AsyncSession类使用异步方式进行操作，
-并提供了一组支持异步IO的API，这样可以在异步程序中执行数据库操作而不会阻塞事件循环。
-在异步应用程序中，使用AsyncSession类而不是同步的会话类是必要的。
+SQLAlchemy提供了AsyncSession类来解决这个问题。AsyncSession类使用异步方式进行操作,
+并提供了一组支持异步IO的API,这样可以在异步程序中执行数据库操作而不会阻塞事件循环。
+在异步应用程序中,使用AsyncSession类而不是同步的会话类是必要的。
+"""
+
+
+"""
+使用 `as` 关键字将 `conn` 作为 `engine.connect()` 返回的连接对象的别名,可以在with语句块中使用 `conn` 进行数据库操作。
+这样可以确保代码块执行完毕后连接自动关闭，避免了忘记关闭连接而导致的数据库资源浪费或者连接泄漏的问题。
+同时，使用 with 语句也可以保证操作过程中出现异常时连接可以正常关闭，从而避免造成数据库的不一致或异常情况。
 """
