@@ -189,7 +189,7 @@ def format_record(record: dict) -> str:
     format_string += "{exception}\n"
     return format_string
 
-
+# 这种在函数内部定义函数并返回函数的方式，是Python中闭包（closure）的一个经典用法。
 def make_filter(name):
     # 过滤操作，当日志要选择对应的日志文件的时候，通过filter进行筛选
     def filter_(record):
@@ -200,15 +200,19 @@ def make_filter(name):
 
 def init_logging():
     loggers = (
+        # 通过 logging.getLogger(name) 获取所有的 logger 对象，然后根据 logger 名称是否以 uvicorn. 开头进行过滤
         logging.getLogger(name)
+        # logging.root 是 Python logging 模块中的全局根 logger，也就是顶级 logger，因此 logging.root.manager.loggerDict 获取的是所有已注册 logger 的字典。
         for name in logging.root.manager.loggerDict
+        # 使用 str.startswith() 方法过滤出名称以 "uvicorn." 开头的 logger对象
         if name.startswith("uvicorn.")
     )
+    # 对logger对象进行循环处理。在每次循环中，将 logger 对象的 handlers 列表清空，以防止日志消息被重复处理。
     for uvicorn_logger in loggers:
         uvicorn_logger.handlers = []
 
     # 这里的操作是为了改变uvicorn默认的logger，使之采用loguru的logger
-    # change handler for default uvicorn logger
+    # 代码创建一个自定义的InterceptHandler实例，并将其添加到名为“uvicorn”的logger的处理程序列表中，即将其添加到uvicorn日志记录器中，从而重置该处理程序列表。
     intercept_handler = InterceptHandler()
     logging.getLogger("uvicorn").handlers = [intercept_handler]
     # set logs output, level and format
@@ -216,9 +220,11 @@ def init_logging():
     # 为pity添加一个info log文件，主要记录debug和info级别的日志
     pity_info = os.path.join(Config.LOG_DIR, f"{Config.PITY_INFO}.log")
     # 为pity添加一个error log文件，主要记录warning和error级别的日志
-    pity_error = os.path.join(Config.LOG_DIR, f"{Config.PITY_ERROR}.log")
+    pity_error = os.path.join(Config.LOG_DIR, f"{Config.PITY_ERROR}.log")  # Config.PITY_INFO的值是"pity_info"，即 f"{Config.PITY_INFO}.log" 将被格式化为"pity_info.log"。
+    
+    # add()，该方法可以向日志中添加一个新的记录器，可以根据需要添加多个记录器。 
+    # pity_info 和 pity_error 分别是两个不同的日志文件的路径，enqueue=True 表示将日志记录异步放入队列中，rotation="20 MB" 和 rotation="10 MB" 分别表示在日志文件大小超过 20MB 和 10MB 时，将日志文件进行轮换。
     logger.add(pity_info, enqueue=True, rotation="20 MB", level="DEBUG", filter=make_filter(Config.PITY_INFO))
-
     logger.add(pity_error, enqueue=True, rotation="10 MB", level="WARNING", filter=make_filter(Config.PITY_ERROR))
 
     # 配置loguru的日志句柄，sink代表输出的目标
@@ -226,8 +232,7 @@ def init_logging():
         handlers=[
             {"sink": sys.stdout, "level": logging.DEBUG, "format": format_record},
             {"sink": pity_info, "level": logging.INFO, "format": INFO_FORMAT, "filter": make_filter(Config.PITY_INFO)},
-            {"sink": pity_error, "level": logging.WARNING, "format": ERROR_FORMAT,
-             "filter": make_filter(Config.PITY_ERROR)}
+            {"sink": pity_error, "level": logging.WARNING, "format": ERROR_FORMAT, "filter": make_filter(Config.PITY_ERROR)}
         ]
     )
     return logger

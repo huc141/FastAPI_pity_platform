@@ -4,7 +4,7 @@ import re
 import time
 from collections import defaultdict
 from datetime import datetime
-from typing import List, Any
+from typing import List, Any, Tuple
 
 from app.core.constructor.case_constructor import TestcaseConstructor
 from app.core.constructor.http_constructor import HttpConstructor
@@ -493,7 +493,7 @@ class Executor(object):
         return datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     @case_log
-    def my_assert(self, asserts: List, json_format: bool) -> [str, bool]:
+    def my_assert(self, asserts: List, json_format: bool) -> Tuple[str, bool]:
         """
         断言验证
         """
@@ -519,7 +519,7 @@ class Executor(object):
         return json.dumps(result, ensure_ascii=False), ok
 
     @case_log
-    def ops(self, assert_type: str, exp, act) -> (bool, str):
+    def ops(self, assert_type: str, exp, act) -> Tuple[bool, str]:
         """
         通过断言类型进行校验
         """

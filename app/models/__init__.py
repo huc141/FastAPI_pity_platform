@@ -73,7 +73,7 @@ class DatabaseHelper(object):
         # 先判断是否已经有connection了，如果有则直接返回
         if connection is not None:
             return connection
-        # 获取sqlalchemy需要的jdbc url：据数据库类型、主机、端口、用户名、密码和数据库名称，生成数据库的JDBC URL。
+        # 获取sqlalchemy需要的jdbc url：据数据库类型、主机、端口、用户名、密码和数据库名称，生成数据库的JDBC URL。get_jdbc_url()是一个静态方法，可以通过类名直接访问。因此，get_jdbc_url()方法可以放在jdbc_url变量赋值的下面。
         jdbc_url = DatabaseHelper.get_jdbc_url(sql_type, host, port, username, password, database)
         # 创建异步引擎
         # create_async_engine 是 SQLAlchemy 的一个异步引擎，它用于创建异步数据库连接。
@@ -106,10 +106,11 @@ class DatabaseHelper(object):
             await session.execute("select 1")
 
 
+# 静态方法 get_jdbc_url()，其作用是根据传入的数据库类型 sql_type，数据库的主机地址 host，端口号 port，用户名 username，密码 password 和数据库名 database，构建出对应数据库的 JDBC URL。
     @staticmethod
     def get_jdbc_url(sql_type: int, host: str, port: int, username: str, password: str, database: str):
         if sql_type == DatabaseEnum.MYSQL:
-            # mysql模式
+            # mysql模式:mysql+aiomysql 和 postgresql+asyncpg 都是 SQLAlchemy 中支持的异步数据库驱动。aiomysql 和 asyncpg 分别是 Python 中异步 MySQL 和 PostgreSQL 驱动的名称。
             return f'mysql+aiomysql://{username}:{password}@{host}:{port}/{database}'
         if sql_type == DatabaseEnum.POSTGRESQL:
             return f'postgresql+asyncpg://{username}:{password}@{host}:{port}/{database}'

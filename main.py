@@ -29,29 +29,37 @@ from app.routers.workspace import router as workspace_router
 from app.utils.scheduler import Scheduler
 from config import Config, PITY_ENV, BANNER
 
+# 调用了定义的 init_logging() 函数，初始化了一个 logger 对象 
 logger = init_logging()
 
+# 使用 logger.bind() 方法将额外的信息（这里是 name=None）绑定到 logger 上，用来补充记录日志的信息。
+# 然后使用 .opt(ansi=True) 方法打开终端颜色输出，最后使用 .success() 方法输出记录的信息，提示 PITY 应用正在运行。
 logger.bind(name=None).opt(ansi=True).success(f"pity is running at <red>{PITY_ENV}</red>")
 logger.bind(name=None).success(BANNER)
 
 
+# request_info() 函数来记录请求信息。
 async def request_info(request: Request):
+    # 在函数内部，首先使用 logger.bind() 方法将额外的信息（这里是 name=None）绑定到 logger 上，然后使用 .debug() 方法记录请求的方法和 URL。
     logger.bind(name=None).debug(f"{request.method} {request.url}")
+    # 使用 try-except 结构来处理请求体。如果请求头中包含了 JSON 数据，则通过 request.json() 方法将其解析，并使用 .bind() 方法将其记录到日志中。
     try:
         body = await request.json()
         logger.bind(payload=body, name=None).debug("request_json: ")
     except:
+    # 如果请求头中没有 JSON 数据，则使用 request.body() 方法获取请求体，并检查其长度是否为 0。如果长度不为 0，则使用 .bind() 方法将其记录到日志中。
         try:
             body = await request.body()
             if len(body) != 0:
                 # 有请求体，记录日志
                 logger.bind(payload=body, name=None).debug(body)
         except:
-            # 忽略文件上传类型的数据
+            # 如果以上步骤都失败了，则说明请求中没有请求体，不做处理。
             pass
 
 
 # 注册路由
+# 在这段代码中，所有的路由器都使用了Depends(request_info)作为依赖项，即在路由处理函数执行之前，都会先执行request_info函数。
 pity.include_router(user.router)
 pity.include_router(project.router, dependencies=[Depends(request_info)])
 pity.include_router(http.router, dependencies=[Depends(request_info)])
@@ -63,8 +71,10 @@ pity.include_router(operation_router, dependencies=[Depends(request_info)])
 pity.include_router(msg_router, dependencies=[Depends(request_info)])
 pity.include_router(workspace_router, dependencies=[Depends(request_info)])
 
+# 用于将一个静态文件目录映射到一个 URL。其中第一个参数是 URL 前缀，第二个参数是一个 StaticFiles 实例，它的 directory 参数指定了静态文件所在的目录，第三个参数是该挂载点的名称。
 pity.mount("/statics", StaticFiles(directory="statics"), name="statics")
 
+# Jinja2Templates 是 FastAPI 内置的模板引擎，用于在应用程序中渲染 HTML 模板。在这段代码中，templates 是一个 Jinja2Templates 实例，它的 directory 参数指定了模板文件所在的目录。
 templates = Jinja2Templates(directory="statics")
 
 
